@@ -1,0 +1,21 @@
+[backup]
+# Path to iTunes backup folder (auto-detected if empty)
+itunes_backup_path = ""
+
+# iTunes backup encryption password (stored in Windows Credential Manager, not here)
+# Run: python main.py setup  to store the password securely
+
+[onedrive]
+# Local OneDrive sync folder path
+# The tool copies WhatsApp backups here; OneDrive desktop app syncs to cloud
+sync_folder = "~/OneDrive/WhatsApp-Backups"
+
+[retention]
+# Number of backup versions to keep (0 = unlimited)
+keep_versions = 30
+
+[scheduler]
+# How often to check for new backups (in minutes)
+check_interval_minutes = 60
+# Auto-launch iTunes at Windows startup
+auto_launch_itunes = true
