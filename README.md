@@ -342,6 +342,56 @@ The **iTunes backup password** is NOT stored in this file. It's stored in Window
 
 ---
 
+## Testing on iPad First (Recommended)
+
+Before trusting the experimental restore on your main iPhone, **test the full backup-and-restore cycle on an iPad**. iPads use the same iTunes backup format and the same WhatsApp data domains, so a successful iPad test gives you confidence the restore will work on your iPhone.
+
+### Why iPad is the perfect test device
+- iTunes backs up iPads identically to iPhones (same format, same `Manifest.db`)
+- WhatsApp uses the same domain names on both devices
+- If something goes wrong, you don't lose your phone's data
+- WhatsApp shipped a **native iPad app in May 2024** (requires iPadOS 15.1+)
+
+### Requirements for the iPad test
+- iPad on **iPadOS 15.1 or newer**
+- WhatsApp installed from the App Store
+- WhatsApp registered with **its own phone number** (not as a linked device — see caveat below)
+
+### Test procedure
+
+1. **Set up WhatsApp on the iPad** with a few test chats (send yourself some messages, share a photo, record a voice note)
+2. **Connect iPad to PC via USB**, trust the computer
+3. **Configure encrypted backup** in iTunes (same as the iPhone setup in Step 2 above)
+4. **Click "Back Up Now"** in iTunes
+5. **Run our backup tool:**
+   ```powershell
+   python main.py backup
+   ```
+   Verify it finds the iPad backup and uploads WhatsApp data to OneDrive.
+6. **Send a few NEW messages** on the iPad (so the current state differs from what's backed up)
+7. **Take a fresh iTunes backup** of the iPad
+8. **Run the restore:**
+   ```powershell
+   python main.py list
+   python main.py restore <backup-name>
+   ```
+9. **Restore via iTunes** (Restore Backup → select the modified backup → enter password)
+10. **Open WhatsApp on iPad** — check whether the OLD chats came back and the NEW messages from step 6 are gone
+
+### Interpreting the result
+
+- ✅ **Old chats restored, other apps unaffected** → the tool works! Safe to use on iPhone.
+- ⚠️ **Old chats restored but some media missing** → backup works, restore partially works. Consider iMazing for restore.
+- ❌ **Restore fails or WhatsApp won't open** → use `--full` mode or iMazing instead.
+
+### Important caveat: linked-device mode
+
+If your iPad WhatsApp is set up as a **linked companion** to your iPhone (the "WhatsApp on linked devices" feature), its local data structure is different from a standalone install. For a meaningful test, register the iPad WhatsApp with **its own phone number** (a spare SIM, a Google Voice number, or a friend's spare number works).
+
+If you only have linked-device WhatsApp on the iPad, the test results won't accurately predict iPhone behavior — but the backup side will still work fine.
+
+---
+
 ## Project Structure
 
 ```
