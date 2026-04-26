@@ -4,6 +4,24 @@ Back up **WhatsApp data only** from your iPhone to OneDrive (instead of iCloud),
 
 ---
 
+> ## ⚠️ Important: Restore is Experimental
+>
+> **The backup side is solid** — it's just file copies, your data isn't at risk.
+>
+> **The selective restore is experimental and may not work on the first try.** It uses a real, documented technique (the same one tools like iMazing use), but this implementation has **not been battle-tested on real devices** and depends on internal iTunes backup formats that Apple can change between iOS versions.
+>
+> **Recommendations:**
+> - ✅ **Use this tool for backup** — extra copies of your WhatsApp data on OneDrive that you control
+> - ⚠️ **Don't rely on this tool as your only restore path** — keep iCloud WhatsApp backup ON as a fallback, OR use a proven commercial tool like **[iMazing](https://imazing.com/)** (~$45) for the actual restore step
+> - 🧪 **Test the restore cycle before you need it** — preferably on a non-critical scenario
+>
+> Specific known limitations:
+> - Per-file blob decryption of encrypted backups is **not fully implemented** in `backup/decrypt.py` (only the manifest is decrypted)
+> - The injection logic is correct in principle but hasn't been verified end-to-end through an actual iTunes restore
+> - WhatsApp version mismatches between backup and current install may cause migration to fail silently
+
+---
+
 ## Table of Contents
 
 - [Why this tool?](#why-this-tool)
