@@ -226,6 +226,35 @@ def cmd_backup(args: argparse.Namespace) -> int:
     info(f"Latest iTunes backup: {latest.device_name} (iOS {latest.ios_version}) — {latest.last_backup_date}")
 
     backup_dir = Path(latest.path)
+
+    # ------------------------------------------------------------------
+    # FULL BACKUP MODE — copy the entire iTunes backup folder.
+    # This gives a PROVEN restore path: just restore via iTunes from the copy.
+    # Trade-off: backups are much larger (10-100 GB).
+    # ------------------------------------------------------------------
+    if getattr(args, "full", False):
+        warn("Full backup mode: copying the ENTIRE iTunes backup folder.")
+        warn("This may be large (10-100 GB) but provides a proven restore path via iTunes.")
+
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        backup_name = f"full_{timestamp}"
+        info(f"Syncing full backup to OneDrive as {backup_name}...")
+        sync = OneDriveSync()
+        sync.sync_to_onedrive(backup_dir, onedrive_folder, backup_name)
+        success(f"Full backup saved to OneDrive: {onedrive_folder / backup_name}")
+        info("To restore: download this folder, place it in iTunes' backup location,")
+        info("then use iTunes 'Restore Backup' to restore your iPhone.")
+
+        info(f"Applying retention policy (keep {keep_versions})...")
+        sync.apply_retention(onedrive_folder, keep_versions)
+        if not sync.is_onedrive_running():
+            warn("OneDrive doesn't appear to be running — files won't sync until it starts.")
+        return 0
+
+    # ------------------------------------------------------------------
+    # WHATSAPP-ONLY MODE (default) — extract only WhatsApp data.
+    # Smaller backups, but restore requires iMazing or our experimental injector.
+    # ------------------------------------------------------------------
     extractor = WhatsAppExtractor()
 
     # Decrypt manifest if needed
@@ -454,7 +483,13 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("setup", help="Run the interactive setup wizard.")
-    sub.add_parser("backup", help="Run a backup cycle.")
+    p_backup = sub.add_parser("backup", help="Run a backup cycle.")
+    p_backup.add_argument(
+        "--full",
+        action="store_true",
+        help="Back up the ENTIRE iTunes backup folder (large but proven restore via iTunes). "
+             "Default is WhatsApp-only (smaller, restore requires iMazing or experimental injector).",
+    )
     sub.add_parser("list", help="List backups available on OneDrive.")
     p_restore = sub.add_parser("restore", help="Restore a backup from OneDrive.")
     p_restore.add_argument("backup_name", help="Name of the OneDrive backup to restore (see `list`).")
